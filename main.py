@@ -1,17 +1,17 @@
 # Copyright (c) Microsoft. All rights reserved.
 """
-Multi-Agent Demo: Assistant with OutlookAgent as a Tool
+Multi-Agent Demo: Assistant with Copilot Studio Agent as a Tool
 
 This sample demonstrates using Microsoft Agent Framework to build two agents:
-1. Assistant - A general-purpose assistant built on Foundry Agent Service
-2. OutlookAgent - Connects to a Copilot Studio agent that manages Outlook calendars
+1. Assistant - A general-purpose assistant built on Azure OpenAI
+2. CopilotStudioAgent - Connects to a Copilot Studio agent for company internal data access
 
-The Assistant can use OutlookAgent as a tool to delegate calendar-related tasks.
+The Assistant can use CopilotStudioAgent as a tool to access internal company data.
 
 Prerequisites:
-- `az login` (Azure CLI authentication for Foundry)
+- `az login` (Azure CLI authentication for Azure OpenAI)
 - Environment variables configured in .env file
-- A Copilot Studio agent deployed for Outlook calendar management
+- A Copilot Studio agent deployed with access to company data
 
 Note: The `--pre` flag is required when installing agent-framework packages 
 while the Microsoft Agent Framework is in preview:
@@ -100,7 +100,7 @@ async def chat_loop(assistant: ChatAgent) -> None:
         assistant: The ChatAgent to interact with.
     """
     print("\n" + "=" * 60)
-    print("Multi-Agent Assistant (with Outlook Calendar Support)")
+    print("Multi-Agent Assistant (with Copilot Studio Integration)")
     print("=" * 60)
     print("Type your message and press Enter to chat.")
     print("Type 'exit' or 'quit' to end the conversation.")
@@ -149,35 +149,35 @@ async def setup_agents():
     foundry_credential = AzureCliCredential(tenant_id=FOUNDRY_TENANT_ID)
     print("  ✓ Foundry credential ready")
     
-    # Create the OutlookAgent (connects to Copilot Studio)
+    # Create the Copilot Studio Agent for internal data access
     # Configuration is read from environment variables:
     # - COPILOTSTUDIOAGENT__ENVIRONMENTID
     # - COPILOTSTUDIOAGENT__SCHEMANAME
     # - COPILOTSTUDIOAGENT__AGENTAPPID
     # - COPILOTSTUDIOAGENT__TENANTID
-    outlook_agent = CopilotStudioAgent(
-        name="OutlookAgent",
-        description="An agent that manages Outlook calendars. Use this for scheduling meetings, "
-                    "viewing calendar events, checking availability, and other calendar operations.",
+    copilot_agent = CopilotStudioAgent(
+        name="CopilotStudioAgent",
+        description="An agent that provides access to company internal data through Copilot Studio. "
+                    "Use this for accessing internal knowledge bases, company documents, and enterprise data.",
         token=pp_token,
     )
-    print("✓ OutlookAgent initialized (Copilot Studio)")
+    print("✓ CopilotStudioAgent initialized")
     
-    # Create a wrapper function for the OutlookAgent that collects all streaming responses
+    # Create a wrapper function for the CopilotStudioAgent that collects all streaming responses
     # This is needed because the agent-as-tool pattern has issues with streaming agents
-    outlook_thread = outlook_agent.get_new_thread()
+    copilot_thread = copilot_agent.get_new_thread()
     
-    async def outlook_calendar_tool(request: str) -> str:
-        """Query the Outlook calendar agent for calendar-related tasks.
+    async def copilot_studio_tool(request: str) -> str:
+        """Query the Copilot Studio agent for company internal data.
         
         Args:
-            request: The calendar request or question to process.
+            request: The request or question to process.
             
         Returns:
-            The response from the Outlook calendar agent.
+            The response from the Copilot Studio agent.
         """
         response_parts = []
-        async for update in outlook_agent.run_stream(request, thread=outlook_thread):
+        async for update in copilot_agent.run_stream(request, thread=copilot_thread):
             if update.text:
                 response_parts.append(update.text)
         return "".join(response_parts)
@@ -188,11 +188,11 @@ async def setup_agents():
         instructions="""You are a helpful general-purpose assistant. You can help with a wide 
 variety of tasks including answering questions, writing content, analyzing information, and more.
 
-For any calendar-related requests (scheduling meetings, viewing events, checking availability, 
-managing appointments), use the outlook_calendar tool to delegate to the specialized calendar agent.
+For any requests that require access to company internal data, knowledge bases, or enterprise 
+information, use the copilot_studio tool to delegate to the specialized Copilot Studio agent.
 
 Be friendly, clear, and helpful in your responses.""",
-        tools=[outlook_calendar_tool],
+        tools=[copilot_studio_tool],
     )
     print("✓ Assistant initialized (Azure OpenAI)")
     
@@ -219,7 +219,7 @@ async def run_chat() -> None:
 
 
 async def test_outlook_agent() -> None:
-    """Test the OutlookAgent directly with an interactive loop."""
+    """Test the Copilot Studio Agent directly with an interactive loop."""
     print("Copilot Studio Agent Direct Chat")
     print("=" * 50)
     
@@ -228,14 +228,14 @@ async def test_outlook_agent() -> None:
     pp_token = acquire_token_with_device_code()
     print("  ✓ Token acquired")
     
-    outlook_agent = CopilotStudioAgent(
-        name="OutlookAgent",
-        description="An agent that manages Outlook calendars.",
+    copilot_agent = CopilotStudioAgent(
+        name="CopilotStudioAgent",
+        description="An agent that provides access to company internal data through Copilot Studio.",
         token=pp_token,
     )
-    print("✓ OutlookAgent initialized (Copilot Studio)")
+    print("✓ CopilotStudioAgent initialized")
     
-    thread = outlook_agent.get_new_thread()
+    thread = copilot_agent.get_new_thread()
     
     print("\n" + "-" * 50)
     print("Type your message and press Enter to chat.")
@@ -253,11 +253,11 @@ async def test_outlook_agent() -> None:
                 print("\nGoodbye!")
                 break
             
-            print("\nOutlookAgent: ", end="", flush=True)
+            print("\nCopilotStudioAgent: ", end="", flush=True)
             
             full_response = []
             try:
-                async for update in outlook_agent.run_stream(user_input, thread=thread):
+                async for update in copilot_agent.run_stream(user_input, thread=thread):
                     if update.text:
                         print(update.text, end="", flush=True)
                         full_response.append(update.text)
