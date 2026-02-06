@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Token cache (contains auth tokens)
+.token_cache.json
+
 # C extensions
 *.so
 
