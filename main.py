@@ -29,6 +29,7 @@ from msal import PublicClientApplication
 from agent_framework import ChatAgent
 from agent_framework.azure import AzureOpenAIChatClient
 from agent_framework.microsoft import CopilotStudioAgent
+from agent_framework.devui import serve
 
 
 # Load environment variables from .env file
@@ -203,9 +204,9 @@ def main() -> None:
     """Main entry point for the multi-agent demo."""
     import sys
     
-    # Check for --test-outlook flag to directly test the OutlookAgent
-    if "--test-outlook" in sys.argv:
-        asyncio.run(test_outlook_agent())
+    # Check for --devui flag to serve in DevUI
+    if "--devui" in sys.argv:
+        run_devui()
         return
     
     # Run the main chat loop
@@ -218,57 +219,13 @@ async def run_chat() -> None:
     await chat_loop(assistant)
 
 
-async def test_outlook_agent() -> None:
-    """Test the Copilot Studio Agent directly with an interactive loop."""
-    print("Copilot Studio Agent Direct Chat")
-    print("=" * 50)
-    
-    # Acquire token using device code flow (delegated, cached)
-    print("  Acquiring Power Platform token...")
-    pp_token = acquire_token_with_device_code()
-    print("  ✓ Token acquired")
-    
-    copilot_agent = CopilotStudioAgent(
-        name="CopilotStudioAgent",
-        description="An agent that provides access to company internal data through Copilot Studio.",
-        token=pp_token,
-    )
-    print("✓ CopilotStudioAgent initialized")
-    
-    thread = copilot_agent.get_new_thread()
-    
-    print("\n" + "-" * 50)
-    print("Type your message and press Enter to chat.")
-    print("Type 'exit' or 'quit' to end.")
-    print("-" * 50 + "\n")
-    
-    while True:
-        try:
-            user_input = input("You: ").strip()
-            
-            if not user_input:
-                continue
-            
-            if user_input.lower() in ("exit", "quit"):
-                print("\nGoodbye!")
-                break
-            
-            print("\nCopilotStudioAgent: ", end="", flush=True)
-            
-            full_response = []
-            try:
-                async for update in copilot_agent.run_stream(user_input, thread=thread):
-                    if update.text:
-                        print(update.text, end="", flush=True)
-                        full_response.append(update.text)
-            except Exception as e:
-                print(f"\n[Error: {type(e).__name__}: {e}]")
-            
-            print("\n")
-            
-        except KeyboardInterrupt:
-            print("\n\nInterrupted. Goodbye!")
-            break
+def run_devui() -> None:
+    """Set up agents and serve in DevUI."""
+    print("Starting DevUI...")
+    assistant = asyncio.run(setup_agents())
+    print("\nLaunching DevUI at http://localhost:8080")
+    print("Press Ctrl+C to stop.\n")
+    serve(entities=[assistant], port=8080, auto_open=True)
 
 
 if __name__ == "__main__":
