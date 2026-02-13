@@ -1,4 +1,3 @@
-# Copyright (c) Microsoft. All rights reserved.
 """
 Multi-Agent Demo: Assistant with Copilot Studio Agent as a Tool
 
