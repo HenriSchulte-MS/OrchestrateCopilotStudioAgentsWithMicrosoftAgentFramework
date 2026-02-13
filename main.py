@@ -196,7 +196,7 @@ Be friendly, clear, and helpful in your responses.""",
     )
     print("✓ Assistant initialized (Azure OpenAI)")
     
-    return assistant
+    return assistant, copilot_agent
 
 
 def main() -> None:
@@ -214,17 +214,17 @@ def main() -> None:
 
 async def run_chat() -> None:
     """Set up agents and run the chat loop."""
-    assistant = await setup_agents()
+    assistant, _ = await setup_agents()
     await chat_loop(assistant)
 
 
 def run_devui() -> None:
     """Set up agents and serve in DevUI."""
     print("Starting DevUI...")
-    assistant = asyncio.run(setup_agents())
+    assistant, copilot_agent = asyncio.run(setup_agents())
     print("\nLaunching DevUI at http://localhost:8080")
     print("Press Ctrl+C to stop.\n")
-    serve(entities=[assistant], port=8080, auto_open=True)
+    serve(entities=[assistant, copilot_agent], port=8080, auto_open=True)
 
 
 if __name__ == "__main__":
