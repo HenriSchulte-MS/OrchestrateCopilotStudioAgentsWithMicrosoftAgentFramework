@@ -29,7 +29,8 @@ The Assistant uses the Copilot Studio Agent as a tool, enabling it to delegate r
 - Python 3.10+
 - Azure CLI (`az login`)
 - An Azure OpenAI deployment
-- A Copilot Studio agent with an App Registration
+- A Copilot Studio agent
+- [App Registration with Power Platform API permission](https://github.com/microsoft/agent-framework/tree/main/python/samples/02-agents/providers/copilotstudio)
 
 ## Installation
 
@@ -98,7 +99,7 @@ Opens a browser to http://localhost:8080 with an interactive chat interface.
    - Copilot Studio uses MSAL device code flow (delegated permissions)
 
 2. **Agent Setup**:
-   - Creates a `CopilotStudioAgent` connected to your Copilot Studio bot
+   - Creates a `CopilotStudioAgent` instance connected to your agent in Copilot Studio
    - Wraps it as a tool function for the main assistant
    - Creates an `AzureOpenAIChatClient` assistant with the tool
 
@@ -110,6 +111,6 @@ Opens a browser to http://localhost:8080 with an interactive chat interface.
 ## Official Resources
 
 - **Microsoft Agent Framework**: https://github.com/microsoft/agent-framework
-- **Copilot Studio Samples**: https://github.com/microsoft/agent-framework/tree/main/python/samples/getting_started/agents/copilotstudio
-- **Azure OpenAI Samples**: https://github.com/microsoft/agent-framework/tree/main/python/samples/getting_started/agents/azure_openai
+- **Copilot Studio Samples**: https://github.com/microsoft/agent-framework/tree/main/python/samples/02-agents/providers/copilotstudio
+- **Azure OpenAI Samples**: https://github.com/microsoft/agent-framework/tree/main/python/samples/02-agents/providers/azure_openai
 
